@@ -1,4 +1,4 @@
-Name: varnish
+Name: varnishTest
 Cartridge-Short-Name: VARNISH
 Display-Name: Downloadable Varnish cartridge 3.x
 Description: "A downloadable varnish cartridge for web caching.."
