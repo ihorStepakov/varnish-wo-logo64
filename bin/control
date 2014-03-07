@@ -1,0 +1,77 @@
+#!/bin/bash -eu
+
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
+CALL=$1
+pidfile="${OPENSHIFT_VARNISH_DIR}var/run/varnish.pid"
+
+function start {
+
+  if ! [ -f $pidfile ]; then
+    "${OPENSHIFT_VARNISH_DIR}usr/sbin/varnishd" -f $OPENSHIFT_REPO_DIR/default.vcl \
+    -n "${OPENSHIFT_VARNISH_DIR}var/lib/varnish" -P "${OPENSHIFT_VARNISH_DIR}var/run/varnish.pid" \
+    -u "$OPENSHIFT_GEAR_UUID" \
+    -a "$OPENSHIFT_VARNISH_IP":"$OPENSHIFT_VARNISH_PORT" \
+    -p vmod_dir="${OPENSHIFT_VARNISH_DIR}usr/lib64/varnish/vmods/" \
+    -p vcl_dir="${OPENSHIFT_REPO_DIR}" \
+    -T "$OPENSHIFT_VARNISH_ADMIN_IP":"$OPENSHIFT_VARNISH_ADMIN_PORT"
+    ret=$?
+
+    if [ $ret -ne 0 ]; then
+      client_result "Varnish failed to start - $ret" 1>&2
+      rm $pidfile
+      return $ret
+    fi
+  fi
+}
+
+function stop {
+
+  pid=$(<$pidfile)
+
+  if [ -f $pidfile -a -n "$pid" ]; then
+    kill -s SIGTERM  $pid
+    rm $pidfile
+  elif [ -f $pidfile ]; then
+    rm $pidfile
+  fi
+
+}
+
+function restart {
+  stop
+  start
+}
+
+function status {
+  if [ -f $pid ]; then
+    client_result  "Varnish cache is running"
+  else 
+    client_result "Varnish cache is stopped"
+  fi
+}
+
+function not_implemented {
+  echo "$CALL: not implemented"
+}
+
+case "$1" in
+  start)         start ;;
+  stop)          stop ;;
+  restart)       restart ;;
+  status)        status ;;
+  reload)        not_implemented ;;
+  tidy)          not_implemented ;;
+  pre-build)     not_implemented ;;
+  build)         not_implemented ;;
+  deploy)        not_implemented ;;
+  post-deploy)   not_implemented ;;
+  pre-snapshot)  not_implemented ;;
+  post-snapshot) not_implemented ;;
+  pre-restore)   not_implemented ;;
+  post-restore)  not_implemented ;;
+  pre-receive)   not_implemented ;;
+  update-configuration) not_implemented ;;
+  *)           exit 0
+esac
+
+exit 0

@@ -1,0 +1,50 @@
+Name: varnish
+Cartridge-Short-Name: VARNISH
+Display-Name: Downloadable Varnish cartridge 3.x
+Description: "A downloadable varnish cartridge for web caching.."
+Version: '3.0'
+Versions: ['3.0']
+License: BSD
+Vendor: Red Hat / Varnish
+Cartridge-Version: 0.1
+Cartridge-Vendor: community
+Source-Url: https://github.com/ihorman/openshift-cartridge-varnish.git
+Categories:
+  - service
+  - web_framework
+Provides:
+  - varnish-0.1
+  - "varnish"
+Cart-Data:
+  - Key: LD_LIBRARH_PATH
+    Type: environment
+    Description: "Updated LD_LIBRARY_PATH"
+Group-Overrides:
+  - components:
+    - downloadable-varnish-0.1
+    - web_proxy
+Publishes:
+  publish-http-url:
+    Type: "NET_TCP:httpd-proxy-info"
+  publish-gear-endpoint:
+    Type: "NET_TCP:gear-endpoint-info"
+Subscribes:
+Endpoints:
+  - Private-IP-Name:   IP
+    Private-Port-Name: PORT
+    Private-Port:      8081
+    Public-Port-Name:  PUBLIC_PORT
+    Mappings:
+      - Frontend:      ""
+        Backend:       ""
+        Options:       { websocket: true }
+      - Frontend:      "/health"
+        Backend:       ""
+        Options:       { health: false }
+  - Private-IP-Name:  ADMIN_IP
+    Private-Port-Name: ADMIN_PORT
+    Private-Port: 8080
+Scaling:
+  Min: 1
+  Max: -1
+Install-Build-Required: false
